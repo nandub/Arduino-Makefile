@@ -1,4 +1,29 @@
 COMMON_INCLUDED = TRUE
+
+########################################################################
+#
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    CURRENT_OS = WINDOWS
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        CURRENT_OS = LINUX
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        CURRENT_OS = MAC
+    endif
+endif
+$(call show_config_variable,CURRENT_OS,[AUTODETECTED])
+
+ifndef GREP_TOOL
+    ifeq ($(CURRENT_OS),MAC)
+        GREP_TOOL := ggrep
+    else
+        GREP_TOOL := grep
+    endif
+endif
+
 # Useful functions
 # Returns the first argument (typically a directory), if the file or directory
 # named by concatenating the first and optionally second argument
@@ -9,8 +34,8 @@ ifndef PARSE_BOARD
 # result = $(call READ_BOARD_TXT, 'boardname', 'parameter')
 PARSE_BOARD = $(shell if [ -f $(BOARDS_TXT) ]; \
 then \
-  grep -Ev '^\#' $(BOARDS_TXT) | \
-  grep -E "^[ \t]*$(1).$(2)=" | \
+  $(GREP_TOOL) -Ev '^\#' $(BOARDS_TXT) | \
+  $(GREP_TOOL) -E "^[ \t]*$(1).$(2)=" | \
   cut -d = -f 2 | \
   cut -d : -f 2; \
 fi)
@@ -43,22 +68,6 @@ ardmk_include = $(shell basename $(word 2,$(MAKEFILE_LIST)))
 
 $(call show_separator)
 $(call arduino_output,$(call ardmk_include) Configuration:)
-
-########################################################################
-#
-# Detect OS
-ifeq ($(OS),Windows_NT)
-    CURRENT_OS = WINDOWS
-else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Linux)
-        CURRENT_OS = LINUX
-    endif
-    ifeq ($(UNAME_S),Darwin)
-        CURRENT_OS = MAC
-    endif
-endif
-$(call show_config_variable,CURRENT_OS,[AUTODETECTED])
 
 ########################################################################
 #
@@ -100,3 +109,4 @@ ifeq ($(CURRENT_OS),WINDOWS)
         echo $(error On Windows, ARDUINO_DIR and other defines must use forward slash and not contain spaces, special characters or be cygdrive relative)
     endif
 endif
+

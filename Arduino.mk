@@ -326,7 +326,7 @@ endif
 ########################################################################
 # 1.5.x vendor - defaults to arduino
 ifndef ARDMK_VENDOR
-    ARCH_LINUX := $(shell grep "Arch Linux" /etc/os-release 2>/dev/null)
+    ARCH_LINUX := $(shell $(GREP_TOOL) "Arch Linux" /etc/os-release 2>/dev/null)
     ifdef ARCH_LINUX
         ARDMK_VENDOR = archlinux-arduino
     else
@@ -362,7 +362,7 @@ ifndef ARDUINO_SKETCHBOOK
     endif
 
     ifneq ($(ARDUINO_PREFERENCES_PATH),)
-        ARDUINO_SKETCHBOOK := $(shell grep --max-count=1 --regexp='sketchbook.path=' \
+        ARDUINO_SKETCHBOOK := $(shell $(GREP_TOOL) --max-count=1 --regexp='sketchbook.path=' \
                                           $(ARDUINO_PREFERENCES_PATH) | \
                                      sed -e 's/sketchbook.path=//' )
     endif
@@ -1774,10 +1774,10 @@ size:	$(TARGET_HEX)
 		$(call avr_size,$(TARGET_ELF),$(TARGET_HEX))
 
 show_boards:
-		@$(CAT) $(BOARDS_TXT) | grep -E '^[a-zA-Z0-9_\-]+.name' | sort -uf | sed 's/.name=/:/' | column -s: -t
+		@$(CAT) $(BOARDS_TXT) | $(GREP_TOOL) -E '^[a-zA-Z0-9_\-]+.name' | sort -uf | sed 's/.name=/:/' | column -s: -t
 
 show_submenu:
-	@$(CAT) $(BOARDS_TXT) | grep -E '[a-zA-Z0-9_\-]+.menu.(cpu|chip).[a-zA-Z0-9_\-]+=' | sort -uf | sed 's/.menu.\(cpu\|chip\)./:/' | sed 's/=/:/' | column -s: -t
+	@$(CAT) $(BOARDS_TXT) | $(GREP_TOOL) -E '[a-zA-Z0-9_\-]+.menu.(cpu|chip).[a-zA-Z0-9_\-]+=' | sort -uf | sed 's/.menu.\(cpu\|chip\)./:/' | sed 's/=/:/' | column -s: -t
 
 monitor:
 ifeq ($(notdir $(MONITOR_CMD)), putty)
